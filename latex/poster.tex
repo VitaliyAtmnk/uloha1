@@ -1,0 +1,172 @@
+\documentclass{article}
+% Match the supplied logo's PDF version and allow exact poster-size math fonts.
+\pdfvariable minorversion=7
+\usepackage{fix-cm}
+\usepackage{fontspec}
+\setmainfont{Arial}
+\setsansfont{Arial}
+\usepackage[czech]{babel}
+\usepackage[paperwidth=1189mm,paperheight=841mm,margin=22mm]{geometry}
+\usepackage{graphicx,xcolor,amsmath,amssymb,booktabs,array}
+\renewcommand{\familydefault}{\sfdefault}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5mm}
+\setlength{\tabcolsep}{4mm}
+\setlength{\abovedisplayskip}{4mm}
+\setlength{\belowdisplayskip}{4mm}
+\definecolor{kmagold}{RGB}{209,156,0}
+\definecolor{kmagrey}{RGB}{198,199,196}
+\definecolor{kmalight}{RGB}{238,238,238}
+\definecolor{kmatext}{RGB}{34,34,34}
+\definecolor{phcolor}{RGB}{120,120,120}
+\newcommand{\AuthorA}{Marek Ondriáš}
+\newcommand{\AuthorB}{Vitalij Atamanjuk}
+\input{results.tex}
+\graphicspath{{../figures/}{images/}}
+
+% Three aligned columns guide the reader from the model to estimates and validation.
+\newcommand{\topic}[2]{%
+  \par\vspace{5mm}{\fontsize{29}{34}\selectfont\bfseries
+  \textcolor{kmagold}{#1}\enspace #2}\par\vspace{2mm}}
+\newcommand{\note}[1]{{\fontsize{18}{23}\selectfont\color{phcolor}#1\par}}
+\newcommand{\pairplots}[2]{%
+  \noindent\includegraphics[width=.492\linewidth]{#1}\hfill
+  \includegraphics[width=.492\linewidth]{#2}\par}
+
+\begin{document}
+\color{kmatext}
+\fontsize{23}{30}\selectfont
+
+\begin{minipage}[c]{.815\textwidth}
+  {\fontsize{55}{64}\selectfont\bfseries
+   Vícerozměrné náhodné veličiny,\\
+   generování vícerozměrných veličin\par}
+  \vspace{5mm}
+  {\fontsize{27}{34}\selectfont\AuthorA\enspace\textcolor{kmagrey}{|}\enspace\AuthorB}
+\end{minipage}\hfill
+\begin{minipage}[c]{.16\textwidth}
+  \includegraphics[width=\linewidth]{kma-cmyk-cz.pdf}
+\end{minipage}
+\par\vspace{5mm}
+{\color{kmagold}\rule{\textwidth}{2.5mm}}
+\par\vspace{3mm}
+
+\noindent
+\begin{minipage}[t]{.318\textwidth}
+\vspace{0pt}
+\topic{01}{Model a cíl programu}
+Odvodit charakteristiky spojitého vektoru $(X,Y)$,
+vygenerovat závislé dvojice a porovnat výběrové odhady s teorií.
+\[
+ f(x,y)=\begin{cases}cxy,&1<x<y<2,\\0,&\text{jinak.}\end{cases}
+ \qquad
+ 1=c\int_1^2\!\int_x^2 xy\,\mathrm{d}y\,\mathrm{d}x
+   =c\,\frac98
+ \quad\Rightarrow\quad \boxed{c=\frac89}.
+\]
+\pairplots{joint_density.pdf}{accepted_pairs.pdf}
+\note{Vlevo sdružená hustota; vpravo počty přijatých dvojic v šestiúhelnících.
+Trojúhelníková podpora vynucuje $X<Y$.}
+
+\topic{02}{Marginální rozdělení}
+Pro $1<t<2$ dostáváme integrací sdružené hustoty:
+\[
+\begin{aligned}
+ f_X(t)&=\frac49t(4-t^2),&
+ F_X(t)&=\frac{-t^4+8t^2-7}{9},\\[2mm]
+ f_Y(t)&=\frac49t(t^2-1),&
+ F_Y(t)&=\frac{(t^2-1)^2}{9}.
+\end{aligned}
+\]
+Mimo $(1,2)$ jsou hustoty nulové. Distribuční funkce mají
+hodnotu $0$ pro $t\leq1$ a $1$ pro $t\geq2$.
+\pairplots{marginal_pdf.pdf}{marginal_cdf.pdf}
+
+\topic{03}{Teoretické charakteristiky}
+\[
+ \boldsymbol\mu=\begin{pmatrix}188/135\\232/135\end{pmatrix},
+ \qquad
+ \boldsymbol\Sigma=\frac1{18225}
+ \begin{pmatrix}1106&484\\484&851\end{pmatrix}.
+\]
+\textbf{Závislost:} $\operatorname{Cov}(X,Y)=\TheoryCovariance>0$.
+Vyšší hodnoty $X$ se pojí s vyššími hodnotami $Y$;
+nenulová kovariance vylučuje nezávislost.
+\end{minipage}\hfill
+\begin{minipage}[t]{.318\textwidth}
+\vspace{0pt}
+\topic{04}{Generování a bodové odhady}
+\textbf{Zamítací metoda:} nezávisle navrhujeme $U,V\sim U(1,2)$
+a $Z\sim U(0,32/9)$. Dvojici přijmeme, právě když
+$U<V$ a $Z\leq\frac89UV$.
+
+Z $\ProposalCount$ návrhů vzniklo \textbf{$n=\SampleCount$ dvojic}.
+Úspěšnost $\AcceptanceRate\,\%$ odpovídá teorii $9/32=28{,}125\,\%$.
+Použit je pevný seed $42$.
+
+\topic{05}{Střední hodnoty a intervalové odhady}
+\includegraphics[width=\linewidth]{mean_estimates.pdf}
+\note{Body: výběrové průměry; úsečky: 95\% intervaly se Studentovým
+kvantilem; přerušované čáry: teorie. Každý řádek má vlastní osu.
+Pro nenormální marginály jde o asymptotické přiblížení.}
+
+\topic{06}{Rozptyly a kovariance}
+\includegraphics[width=\linewidth]{covariance_estimates.pdf}
+\note{Shodná barevná škála. Na diagonále jsou rozptyly,
+mimo diagonálu kovariance. Výběrová matice používá jmenovatel $n-1$.}
+\[
+ S=\frac1{n-1}\sum_{i=1}^n
+ (\mathbf z_i-\bar{\mathbf z})(\mathbf z_i-\bar{\mathbf z})^{\mathsf T},
+ \qquad \mathbf z_i=(x_i,y_i)^{\mathsf T}.
+\]
+{\fontsize{21}{27}\selectfont
+\renewcommand{\arraystretch}{1.45}
+\setlength{\tabcolsep}{3mm}
+\par\noindent
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrrl@{}}
+\toprule
+Charakteristika & Teorie & Odhad & 95\% interval\\
+\midrule
+$\mathrm E[X]$ & $\TheoryMeanX$ & $\SampleMeanX$ & $(\LowerMeanX;\UpperMeanX)$\\
+$\mathrm E[Y]$ & $\TheoryMeanY$ & $\SampleMeanY$ & $(\LowerMeanY;\UpperMeanY)$\\
+$\operatorname{Var}(X)$ & $\TheoryVarianceX$ & $\SampleVarianceX$ & $(\LowerVarianceX;\UpperVarianceX)$\\
+$\operatorname{Var}(Y)$ & $\TheoryVarianceY$ & $\SampleVarianceY$ & $(\LowerVarianceY;\UpperVarianceY)$\\
+$\operatorname{Cov}(X,Y)$ & $\TheoryCovariance$ & $\SampleCovariance$ & ---\\
+\bottomrule
+\end{tabular*}\par}
+
+\textbf{Technologie:} Python, NumPy (generování a odhady),
+SymPy (přesné integrály), SciPy (kvantily), Matplotlib a Jupyter.
+\end{minipage}\hfill
+\begin{minipage}[t]{.318\textwidth}
+\vspace{0pt}
+\topic{07}{Výběr proti teoretickému rozdělení}
+\pairplots{comparison_x_pdf.pdf}{comparison_y_pdf.pdf}
+\pairplots{comparison_x_cdf.pdf}{comparison_y_cdf.pdf}
+Histogramy sledují teoretické hustoty. Největší absolutní odchylka
+empirické distribuční funkce od teorie je
+$D_X=\CdfDeviationX$, $D_Y=\CdfDeviationY$.
+\note{Jde o popis odchylky v daném výběru, nikoli o výsledek testu hypotézy.}
+
+\topic{08}{Vliv rozsahu výběru}
+\pairplots{summary_mean_error.pdf}{summary_variance_error.pdf}
+\pairplots{summary_mean_ci_width.pdf}{summary_variance_ci_width.pdf}
+\note{Nahoře absolutní chyby; dole šířky 95\% intervalů.
+Rozsahy $n=1\,000,5\,000,10\,000,25\,000,50\,000$ jsou vnořené prefixy
+jednoho doplněného výběru; nejde o nezávislá opakování.}
+
+\topic{09}{Závěry a využití}
+\textbf{Více dat zmenšuje nejistotu.} Intervaly pro průměry jsou
+při $n=50\,000$ přibližně $\WidthRatioX\times$ (X) a $\WidthRatioY\times$ (Y)
+užší než při $n=1\,000$. Chyba jednotlivého odhadu však nemusí klesat monotónně.
+
+\textbf{95\% neznamená jistotu.} V původním výběru oba intervaly pro
+průměry těsně míjejí teoretické hodnoty. Nominální spolehlivost se
+vztahuje k opakovanému výběru, nikoli k záruce pro jediný interval.
+
+\textbf{Omezení a využití.} Intervaly pro rozptyly používají
+$\chi^2$ postup určený pro normální data; zde jsou jen orientační.
+Program umožňuje kontrolu simulátoru a studium odhadů závislých veličin.
+\end{minipage}
+\end{document}
